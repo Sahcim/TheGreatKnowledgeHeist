@@ -1,6 +1,6 @@
 import os
 from argparse import ArgumentParser
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import numpy as np
 from datasets import Dataset, load_dataset
@@ -27,28 +27,48 @@ def amazon_prepare_and_save(
     encoded_dataset.save_to_disk(os.path.join(save_path, split))
 
 
+def tokenize_and_preserve_labels(
+    row: Dict[str, Any], tokenizer: BertTokenizer
+) -> Dict[str, Any]:
+    tokenized_sentence = []
+    labels = []
+
+    for word, label in zip(row["tokens"], row["labels"]):
+        # Tokenize the word and count # of subwords the word is broken into
+        tokenized_word = tokenizer.tokenize(word.lower())
+        n_subwords = len(tokenized_word)
+
+        # Add the tokenized word to the final tokenized word list
+        tokenized_sentence.extend(tokenized_word)
+
+        # Add the same label to the new list of labels `n_subwords` times
+        labels.extend([label] * n_subwords)
+    row["labels"] = labels
+    return row
+
+
 def acronyms_prepare_and_save(
     save_path: str,
     split: str,
     sample: Optional[int],
     dataset: Dataset,
     tokenizer: BertTokenizer,
-    num_workers: int,
+    num_workers: int
 ) -> None:
     if sample:
         sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
         dataset = dataset.select(sample_idx)
+    dataset = dataset.map(lambda x: tokenize_and_preserve_labels(x, tokenizer))
+    dataset = dataset.map(
+        lambda row: tokenizer(
+            " ".join(row["tokens"]), padding="max_length", truncation=True
+        ),
+    )
     encoded_dataset = dataset.map(
         lambda row: {
-            "tokens_ids": tokenizer.convert_tokens_to_ids(row["tokens"])[
-                : tokenizer.model_max_length
-            ]
-            + [0 for _ in range(tokenizer.model_max_length - len(row["tokens"]))],
-            "labels_padded": row["labels"][: tokenizer.model_max_length]
-            + [0 for _ in range(tokenizer.model_max_length - len(row["tokens"]))],
-        },
-        batched=False,
-        num_proc=num_workers,
+            "labels": row["labels"][: tokenizer.model_max_length]
+            + [0 for _ in range(tokenizer.model_max_length - len(row["labels"]))]
+        }
     )
     encoded_dataset.save_to_disk(os.path.join(save_path, split))
 
@@ -84,7 +104,6 @@ PREPARE_AND_SAVE = {
     "swag": swag_prepare_and_save,
 }
 
-
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument(
@@ -106,6 +125,7 @@ if __name__ == "__main__":
         padding="max_length",
         return_tensors="np",
         model_max_length=args.max_sentence_length,
+        do_lower_case=True,
     )
 
     dataset_dict = load_dataset(args.dataset_name)
