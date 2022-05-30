@@ -9,11 +9,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 from transformers import BertTokenizer
 
-PROJECT_ROOT = Path(
-    "/home/maria/Documents/TheGreatKnowledgeHeist/thegreatknowledgeheist"
-)
-sys.path.append(str(PROJECT_ROOT))
-from models.bert import SentimentBert
+from thegreatknowledgeheist.models.bert import SentimentBert
 
 GPUS = 1
 NUM_WORKERS = 8
