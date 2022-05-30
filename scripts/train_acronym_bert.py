@@ -23,7 +23,7 @@ def train_model(model, dataloaders):
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
         monitor="val_loss",
         dirpath=PROJECT_ROOT / "model_checkpoints",
-        filename="models-{epoch:02d}-{val_accuracy:.2f}",
+        filename="acronym-model-{epoch:02d}-{val_accuracy:.2f}",
         save_top_k=1,
         mode="min",
     )
@@ -31,7 +31,7 @@ def train_model(model, dataloaders):
     trainer = Trainer(
         logger=WandbLogger(
             save_dir=str(PROJECT_ROOT / "logs"),
-            project="TheGreatKnowledgeTransfer",
+            project="TheGreatKnowledgeTransferAcronym",
             entity="mma",
         ),
         gpus=GPUS,
@@ -44,10 +44,10 @@ def train_model(model, dataloaders):
 
 
 dataloaders = get_dataloaders(
-    dataset_name="amazon_polarity",
+    dataset_name="acronym_identification",
     path_to_dataset=str(PROJECT_ROOT / "data" / "datasets"),
     batch_size=BATCH_SIZE,
     num_workers=NUM_WORKERS,
 )
-model = Bert(config={"lr": LR, "eps": EPS}, task="amazon_polarity")
+model = Bert(config={"lr": LR, "eps": EPS}, task="acronym_identification")
 train_model(model, dataloaders)
