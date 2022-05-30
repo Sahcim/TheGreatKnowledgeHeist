@@ -53,7 +53,7 @@ def acronyms_prepare_and_save(
     sample: Optional[int],
     dataset: Dataset,
     tokenizer: BertTokenizer,
-    num_workers: int
+    num_workers: int,
 ) -> None:
     if sample:
         sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)

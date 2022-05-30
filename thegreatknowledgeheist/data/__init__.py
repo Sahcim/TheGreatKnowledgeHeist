@@ -7,9 +7,7 @@ from torch.utils.data.dataloader import DataLoader
 
 
 def get_amazon_polarity(path_to_dataset: str) -> Dict[str, Dataset]:
-    train_dataset = load_from_disk(
-        os.path.join(path_to_dataset, "train")
-    )
+    train_dataset = load_from_disk(os.path.join(path_to_dataset, "train"))
     train_dataset.set_format(
         type="torch",
         columns=["input_ids", "token_type_ids", "attention_mask", "labels"],
@@ -23,9 +21,7 @@ def get_amazon_polarity(path_to_dataset: str) -> Dict[str, Dataset]:
 
 
 def get_acronym_identification(path_to_dataset: str) -> Dict[str, Dataset]:
-    train_dataset = load_from_disk(
-        os.path.join(path_to_dataset, "train")
-    )
+    train_dataset = load_from_disk(os.path.join(path_to_dataset, "train"))
     train_dataset.set_format(
         type="torch",
         columns=["input_ids", "token_type_ids", "attention_mask", "labels"],
@@ -47,9 +43,7 @@ def get_swag(path_to_dataset: str) -> Dict[str, Dataset]:
             "labels": row["labels"],
         }
 
-    train_dataset = load_from_disk(
-        os.path.join(path_to_dataset, "train")
-    )
+    train_dataset = load_from_disk(os.path.join(path_to_dataset, "train"))
     train_dataset.set_transform(set_format)
     val_dataset = load_from_disk(os.path.join(path_to_dataset, "val"))
     val_dataset.set_transform(set_format)
