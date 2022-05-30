@@ -3,4 +3,7 @@ __pycache__/
 *egg-info/
 .ipynb_checkpoints
 .env
+.idea
 venv/
+thegreatknowledgeheist/logs/
+thegreatknowledgeheist/model_checkpoints/
