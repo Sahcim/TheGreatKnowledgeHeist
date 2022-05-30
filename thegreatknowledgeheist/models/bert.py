@@ -1,11 +1,11 @@
 import pytorch_lightning as pl
 import torch
 from torch.optim import Adam
-from transformers import BertForSequenceClassification
+from transformers import BertForSequenceClassification, BertForTokenClassification
 
 
-class SentimentBert(pl.LightningModule):
-    def __init__(self, config):
+class Bert(pl.LightningModule):
+    def __init__(self, config, task):
         super().__init__()
 
         self.lr = config["lr"]
@@ -13,12 +13,18 @@ class SentimentBert(pl.LightningModule):
 
         self.save_hyperparameters()
 
-        self.model = BertForSequenceClassification.from_pretrained(
-            "bert-base-uncased", num_labels=2
-        )
+        self.task = task
+        if self.task == "amazon_polarity":
+            self.model = BertForSequenceClassification.from_pretrained(
+                "bert-base-uncased", num_labels=2
+            )
+        elif self.task == "acronym_identification":
+            self.model = BertForTokenClassification.from_pretrained(
+                "bert-base-uncased", num_labels=5
+            )
 
     def configure_optimizers(self):
-        optimizer = Adam(self.model.classifier.parameters(), lr=self.lr, eps=self.eps)
+        optimizer = Adam(self.model.parameters(), lr=self.lr, eps=self.eps)
         return optimizer
 
     def forward(self, **inputs):
@@ -28,7 +34,10 @@ class SentimentBert(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss, logits = outputs[:2]
-        preds = torch.argmax(logits, axis=1)
+        if self.task == "amazon_polarity":
+            preds = torch.argmax(logits, axis=1)
+        elif self.task == "acronym_identification":
+            preds = logits.argmax(-1)
         correct_preds = torch.sum(preds == batch["labels"])
         self.log("train_loss", loss, on_step=False, on_epoch=True)
         self.log(
@@ -39,7 +48,10 @@ class SentimentBert(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss, logits = outputs[:2]
-        preds = torch.argmax(logits, axis=1)
+        if self.task == "amazon_polarity":
+            preds = torch.argmax(logits, axis=1)
+        elif self.task == "acronym_identification":
+            preds = logits.argmax(-1)
         correct_preds = torch.sum(preds == batch["labels"])
         self.log("val_loss", loss, on_step=False, on_epoch=True)
         self.log(
