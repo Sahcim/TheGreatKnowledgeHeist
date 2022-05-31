@@ -59,6 +59,8 @@ def acronyms_prepare_and_save(
         lambda row: tokenizer(
             " ".join(row["tokens"]), padding="max_length", truncation=True
         ),
+        batched=False,
+        num_workers=num_workers,
     )
     encoded_dataset.save_to_disk(os.path.join(save_path, split))
 
@@ -74,8 +76,11 @@ def swag_prepare_and_save(
     def prepare(row):
         # Based on https://github.com/google-research/bert/issues/38
         start_sen = row["startphrase"]
-        sents = [" ".join([start_sen, row[f"ending{i}"]]) for i in range(4)]
-        return tokenizer(sents, padding="max_length", truncation=True)
+
+        return tokenizer([start_sen for _ in range(4)],
+                         [row[f'ending{i}'] for i in range(4)],
+                         padding="max_length",
+                         truncation=True)
 
     if sample:
         sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
