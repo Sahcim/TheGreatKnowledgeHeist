@@ -30,7 +30,6 @@ def amazon_prepare_and_save(
 def tokenize_and_preserve_labels(
     row: Dict[str, Any], tokenizer: BertTokenizer
 ) -> Dict[str, Any]:
-    tokenized_sentence = []
     labels = []
 
     for word, label in zip(row["tokens"], row["labels"]):
@@ -38,12 +37,9 @@ def tokenize_and_preserve_labels(
         tokenized_word = tokenizer.tokenize(word.lower())
         n_subwords = len(tokenized_word)
 
-        # Add the tokenized word to the final tokenized word list
-        tokenized_sentence.extend(tokenized_word)
-
         # Add the same label to the new list of labels `n_subwords` times
         labels.extend([label] * n_subwords)
-    row["labels"] = labels
+    row["labels"] = labels[: tokenizer.model_max_length] + [0 for _ in range(tokenizer.model_max_length - len(labels))]
     return row
 
 
@@ -59,16 +55,10 @@ def acronyms_prepare_and_save(
         sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
         dataset = dataset.select(sample_idx)
     dataset = dataset.map(lambda x: tokenize_and_preserve_labels(x, tokenizer))
-    dataset = dataset.map(
+    encoded_dataset = dataset.map(
         lambda row: tokenizer(
             " ".join(row["tokens"]), padding="max_length", truncation=True
         ),
-    )
-    encoded_dataset = dataset.map(
-        lambda row: {
-            "labels": row["labels"][: tokenizer.model_max_length]
-            + [0 for _ in range(tokenizer.model_max_length - len(row["labels"]))]
-        }
     )
     encoded_dataset.save_to_disk(os.path.join(save_path, split))
 

@@ -45,7 +45,7 @@ def train_model(model, dataloaders):
 
 dataloaders = get_dataloaders(
     dataset_name="acronym_identification",
-    path_to_dataset=str(PROJECT_ROOT / "data" / "datasets"),
+    path_to_dataset=str(PROJECT_ROOT / "data" / "datasets" / "acronym_identification"),
     batch_size=BATCH_SIZE,
     num_workers=NUM_WORKERS,
 )

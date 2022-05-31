@@ -45,7 +45,7 @@ def train_model(model, dataloaders):
 
 dataloaders = get_dataloaders(
     dataset_name="amazon_polarity",
-    path_to_dataset=str(PROJECT_ROOT / "data" / "datasets"),
+    path_to_dataset=str(PROJECT_ROOT / "data" / "datasets" / "amazon_polarity"),
     batch_size=BATCH_SIZE,
     num_workers=NUM_WORKERS,
 )
