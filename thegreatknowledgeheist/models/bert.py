@@ -1,7 +1,11 @@
 import pytorch_lightning as pl
 import torch
 from torch.optim import Adam
-from transformers import BertForSequenceClassification, BertForTokenClassification, BertForMultipleChoice
+from transformers import (
+    BertForMultipleChoice,
+    BertForSequenceClassification,
+    BertForTokenClassification,
+)
 
 
 class Bert(pl.LightningModule):
@@ -23,9 +27,13 @@ class Bert(pl.LightningModule):
                 "bert-base-uncased", num_labels=5
             )
         elif self.task == "swag":
-            self.model = BertForMultipleChoice.from_pretrained("bert-base-uncased", num_labels=4)
+            self.model = BertForMultipleChoice.from_pretrained(
+                "bert-base-uncased", num_labels=4
+            )
         else:
-            raise NotImplemented("Possible tasks are amazon_polarity, acronym_identification and swag")
+            raise NotImplemented(
+                "Possible tasks are amazon_polarity, acronym_identification and swag"
+            )
 
     def configure_optimizers(self):
         optimizer = Adam(self.model.parameters(), lr=self.lr, eps=self.eps)
@@ -43,7 +51,9 @@ class Bert(pl.LightningModule):
         elif self.task == "acronym_identification":
             preds = logits.argmax(-1)
         else:
-            raise NotImplemented("Possible tasks are amazon_polarity, acronym_identification and swag")
+            raise NotImplemented(
+                "Possible tasks are amazon_polarity, acronym_identification and swag"
+            )
 
         correct_preds = torch.sum(preds == batch["labels"])
         self.log("train_loss", loss, on_step=False, on_epoch=True)
@@ -60,7 +70,9 @@ class Bert(pl.LightningModule):
         elif self.task == "acronym_identification":
             preds = logits.argmax(-1)
         else:
-            raise NotImplemented("Possible tasks are amazon_polarity, acronym_identification and swag")
+            raise NotImplemented(
+                "Possible tasks are amazon_polarity, acronym_identification and swag"
+            )
         correct_preds = torch.sum(preds == batch["labels"])
         self.log("val_loss", loss, on_step=False, on_epoch=True)
         self.log(

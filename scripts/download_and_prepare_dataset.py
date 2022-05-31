@@ -62,7 +62,7 @@ def acronyms_prepare_and_save(
             " ".join(row["tokens"]), padding="max_length", truncation=True
         ),
         batched=False,
-        num_workers=num_workers,
+        num_proc=num_workers,
     )
     encoded_dataset.save_to_disk(os.path.join(save_path, split))
 
