@@ -39,7 +39,9 @@ def tokenize_and_preserve_labels(
 
         # Add the same label to the new list of labels `n_subwords` times
         labels.extend([label] * n_subwords)
-    row["labels"] = labels[: tokenizer.model_max_length] + [0 for _ in range(tokenizer.model_max_length - len(labels))]
+    row["labels"] = labels[: tokenizer.model_max_length] + [
+        0 for _ in range(tokenizer.model_max_length - len(labels))
+    ]
     return row
 
 
@@ -77,10 +79,12 @@ def swag_prepare_and_save(
         # Based on https://github.com/google-research/bert/issues/38
         start_sen = row["startphrase"]
 
-        return tokenizer([start_sen for _ in range(4)],
-                         [row[f'ending{i}'] for i in range(4)],
-                         padding="max_length",
-                         truncation=True)
+        return tokenizer(
+            [start_sen for _ in range(4)],
+            [row[f"ending{i}"] for i in range(4)],
+            padding="max_length",
+            truncation=True,
+        )
 
     if sample:
         sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
