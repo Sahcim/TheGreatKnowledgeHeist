@@ -2,13 +2,18 @@ from argparse import ArgumentParser
 
 import pytorch_lightning as pl
 import wandb
-import yaml
 from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 
 from thegreatknowledgeheist.data import get_dataloaders
 from thegreatknowledgeheist.io import load_yaml
-from thegreatknowledgeheist.models.bert import Bert
+from thegreatknowledgeheist.models.bert import AmazonPolarityBert, AcronymIdentificationBert, SwagBert
+
+GET_MODEL = {
+    "amazon_polarity": AmazonPolarityBert,
+    "acronym_identification": AcronymIdentificationBert,
+    "swag": SwagBert,
+}
 
 
 def train_model(model, dataloaders, config):
@@ -48,5 +53,6 @@ if __name__ == "__main__":
         batch_size=config["batch_size"],
         num_workers=config["num_workers"],
     )
-    model = Bert(config={"lr": config["lr"], "eps": config["eps"]}, task=config["task"])
+
+    model = GET_MODEL[config["task"]](config={"lr": config["lr"], "eps": config["eps"]})
     train_model(model, dataloaders, config)
