@@ -1,3 +1,5 @@
+from argparse import ArgumentParser
+
 import pytorch_lightning as pl
 import wandb
 import yaml
@@ -5,6 +7,7 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import WandbLogger
 
 from thegreatknowledgeheist.data import get_dataloaders
+from thegreatknowledgeheist.io import load_yaml
 from thegreatknowledgeheist.models.bert import Bert
 
 
@@ -33,8 +36,12 @@ def train_model(model, dataloaders, config):
 
 
 if __name__ == "__main__":
-    with open('train_config.yaml') as f:
-        config = yaml.load(f, Loader=yaml.FullLoader)
+    parser = ArgumentParser()
+    parser.add_argument(
+        "config_path", type=str, help="Path to config yaml"
+    )
+    args = parser.parse_args()
+    config = load_yaml(args.config_path)
     dataloaders = get_dataloaders(
         dataset_name=config["task"],
         path_to_dataset=f"{config['dataset_path']}/{config['task']}",
