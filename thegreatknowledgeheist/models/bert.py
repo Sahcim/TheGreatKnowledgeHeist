@@ -85,5 +85,5 @@ class AcronymIdentificationBert(BaseBert):
 
     def calculate_accuracy(self, logits, labels):
         preds = logits.argmax(-1)
-        correct_preds = torch.mean(preds == labels, dim=1)
-        return correct_preds / len(preds)
+        accuracy = torch.mean((preds == labels).float())
+        return accuracy
