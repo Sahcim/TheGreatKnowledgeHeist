@@ -35,9 +35,8 @@ def acronyms_prepare_and_save(
     tokenizer: BertTokenizer,
     num_workers: int,
 ) -> None:
-
     def tokenize_and_preserve_labels(
-            row: Dict[str, Any], tokenizer: BertTokenizer
+        row: Dict[str, Any], tokenizer: BertTokenizer
     ) -> Dict[str, Any]:
         labels = []
 

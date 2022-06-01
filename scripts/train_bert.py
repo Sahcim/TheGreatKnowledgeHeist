@@ -7,7 +7,11 @@ from pytorch_lightning.loggers import WandbLogger
 
 from thegreatknowledgeheist.data import get_dataloaders
 from thegreatknowledgeheist.io import load_yaml
-from thegreatknowledgeheist.models.bert import AmazonPolarityBert, AcronymIdentificationBert, SwagBert
+from thegreatknowledgeheist.models.bert import (
+    AcronymIdentificationBert,
+    AmazonPolarityBert,
+    SwagBert,
+)
 
 GET_MODEL = {
     "amazon_polarity": AmazonPolarityBert,
@@ -20,7 +24,7 @@ def train_model(model, dataloaders, config):
     checkpoint_callback = pl.callbacks.ModelCheckpoint(
         monitor="val_loss",
         dirpath=f"{config['outputs_path']}/model_checkpoints",
-        filename=config['task'] + "-model-{epoch:02d}-{val_accuracy:.2f}",
+        filename=config["task"] + "-model-{epoch:02d}-{val_accuracy:.2f}",
         save_top_k=1,
         mode="min",
     )
@@ -42,9 +46,7 @@ def train_model(model, dataloaders, config):
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument(
-        "config_path", type=str, help="Path to config yaml"
-    )
+    parser.add_argument("config_path", type=str, help="Path to config yaml")
     args = parser.parse_args()
     config = load_yaml(args.config_path)
     dataloaders = get_dataloaders(
