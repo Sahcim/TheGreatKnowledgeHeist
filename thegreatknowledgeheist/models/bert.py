@@ -11,6 +11,13 @@ from abc import ABC, abstractmethod
 
 class BaseBert(pl.LightningModule, ABC):
 
+    def __init__(self, config):
+        super().__init__()
+        self.lr = config["lr"]
+        self.eps = config["eps"]
+
+        self.save_hyperparameters()
+
     @abstractmethod
     def calculate_accuracy(self, logits, labels):
         pass
@@ -47,11 +54,8 @@ class BaseBert(pl.LightningModule, ABC):
 class AmazonPolarityBert(BaseBert):
 
     def __init__(self, config):
-        super().__init__()
-        self.lr = config["lr"]
-        self.eps = config["eps"]
+        super().__init__(config)
 
-        self.save_hyperparameters()
         self.model = BertForSequenceClassification.from_pretrained(
             "bert-base-uncased", num_labels=2
         )
@@ -65,11 +69,8 @@ class AmazonPolarityBert(BaseBert):
 class SwagBert(BaseBert):
 
     def __init__(self, config):
-        super().__init__()
-        self.lr = config["lr"]
-        self.eps = config["eps"]
+        super().__init__(config)
 
-        self.save_hyperparameters()
         self.model = BertForMultipleChoice.from_pretrained(
             "bert-base-uncased", num_labels=4
         )
