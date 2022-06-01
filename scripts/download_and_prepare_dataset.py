@@ -27,24 +27,6 @@ def amazon_prepare_and_save(
     encoded_dataset.save_to_disk(os.path.join(save_path, split))
 
 
-def tokenize_and_preserve_labels(
-    row: Dict[str, Any], tokenizer: BertTokenizer
-) -> Dict[str, Any]:
-    labels = []
-
-    for word, label in zip(row["tokens"], row["labels"]):
-        # Tokenize the word and count # of subwords the word is broken into
-        tokenized_word = tokenizer.tokenize(word.lower())
-        n_subwords = len(tokenized_word)
-
-        # Add the same label to the new list of labels `n_subwords` times
-        labels.extend([label] * n_subwords)
-    row["labels"] = labels[: tokenizer.model_max_length] + [
-        0 for _ in range(tokenizer.model_max_length - len(labels))
-    ]
-    return row
-
-
 def acronyms_prepare_and_save(
     save_path: str,
     split: str,
@@ -53,6 +35,24 @@ def acronyms_prepare_and_save(
     tokenizer: BertTokenizer,
     num_workers: int,
 ) -> None:
+
+    def tokenize_and_preserve_labels(
+            row: Dict[str, Any], tokenizer: BertTokenizer
+    ) -> Dict[str, Any]:
+        labels = []
+
+        for word, label in zip(row["tokens"], row["labels"]):
+            # Tokenize the word and count # of subwords the word is broken into
+            tokenized_word = tokenizer.tokenize(word.lower())
+            n_subwords = len(tokenized_word)
+
+            # Add the same label to the new list of labels `n_subwords` times
+            labels.extend([label] * n_subwords)
+        row["labels"] = labels[: tokenizer.model_max_length] + [
+            0 for _ in range(tokenizer.model_max_length - len(labels))
+        ]
+        return row
+
     if sample:
         sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
         dataset = dataset.select(sample_idx)
