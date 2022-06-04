@@ -24,12 +24,12 @@ def get_acronym_identification(path_to_dataset: str) -> Dict[str, Dataset]:
     train_dataset = load_from_disk(os.path.join(path_to_dataset, "train"))
     train_dataset.set_format(
         type="torch",
-        columns=["labels_padded", "tokens_ids"],
+        columns=["input_ids", "token_type_ids", "attention_mask", "labels"],
     )
     val_dataset = load_from_disk(os.path.join(path_to_dataset, "val"))
     val_dataset.set_format(
         type="torch",
-        columns=["labels_padded", "tokens_ids"],
+        columns=["input_ids", "token_type_ids", "attention_mask", "labels"],
     )
     return {"train": train_dataset, "val": val_dataset}
 

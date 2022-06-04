@@ -7,3 +7,4 @@ __pycache__/
 venv/
 thegreatknowledgeheist/logs/
 thegreatknowledgeheist/model_checkpoints/
+thegreatknowledgeheist/data/
