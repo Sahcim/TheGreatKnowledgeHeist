@@ -4,7 +4,8 @@ import pytorch_lightning as pl
 import torch
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
-from torchmetrics.functional import accuracy, f1_score
+from torchmetrics import F1Score
+from torchmetrics.functional import accuracy
 from transformers import (
     BertForMultipleChoice,
     BertForSequenceClassification,
@@ -71,7 +72,7 @@ class BaseBert(pl.LightningModule, ABC):
         return accuracy(logits, labels)
 
     def calculate_f1_score(self, logits, labels):
-        return f1_score(logits, labels)
+        return self.f1(logits, labels)
 
 
 class AmazonPolarityBert(BaseBert):
@@ -83,6 +84,7 @@ class AmazonPolarityBert(BaseBert):
         )
         if config["freeze_first_n"] != -1:
             self.freeze_first_n(config["freeze_first_n"])
+        self.f1 = F1Score(num_classes=2, average="macro")
 
 
 class SwagBert(BaseBert):
@@ -94,6 +96,7 @@ class SwagBert(BaseBert):
         )
         if config["freeze_first_n"] != -1:
             self.freeze_first_n(config["freeze_first_n"])
+        self.f1 = F1Score(num_classes=4, average="macro")
 
 
 class AcronymIdentificationBert(BaseBert):
@@ -105,11 +108,14 @@ class AcronymIdentificationBert(BaseBert):
         )
         if config["freeze_first_n"] != -1:
             self.freeze_first_n(config["freeze_first_n"])
+        self.f1 = F1Score(num_classes=5, average="macro")
 
     def calculate_accuracy(self, logits, labels):
-        preds = logits.argmax(-1)
-        return accuracy(preds, labels, mdmc_average="global")
+        preds = torch.flatten(logits.argmax(-1))
+        labels = torch.flatten(labels)
+        return accuracy(preds, labels)
 
     def calculate_f1_score(self, logits, labels):
-        preds = logits.argmax(-1)
-        return f1_score(preds, labels, mdmc_average="global")
+        preds = torch.flatten(logits.argmax(-1))
+        labels = torch.flatten(labels)
+        return self.f1(preds, labels)
