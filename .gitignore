@@ -8,3 +8,5 @@ venv/
 thegreatknowledgeheist/logs/
 thegreatknowledgeheist/model_checkpoints/
 thegreatknowledgeheist/data/
+data/
+out/

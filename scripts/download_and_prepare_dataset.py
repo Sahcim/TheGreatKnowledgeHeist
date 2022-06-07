@@ -14,9 +14,10 @@ def amazon_prepare_and_save(
     dataset: Dataset,
     tokenizer: BertTokenizer,
     num_workers: int,
+    seed: np.random.default_rng,
 ) -> None:
     if sample:
-        sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
+        sample_idx = seed.choice(dataset.num_rows, sample, replace=False)
         dataset = dataset.select(sample_idx)
     encoded_dataset = dataset.map(
         lambda row: tokenizer(row["content"], padding="max_length", truncation=True),
@@ -34,6 +35,7 @@ def acronyms_prepare_and_save(
     dataset: Dataset,
     tokenizer: BertTokenizer,
     num_workers: int,
+    seed: np.random.default_rng,
 ) -> None:
     def tokenize_and_preserve_labels(
         row: Dict[str, Any], tokenizer: BertTokenizer
@@ -53,9 +55,11 @@ def acronyms_prepare_and_save(
         return row
 
     if sample:
-        sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
+        sample_idx = seed.choice(dataset.num_rows, sample, replace=False)
         dataset = dataset.select(sample_idx)
-    dataset = dataset.map(lambda x: tokenize_and_preserve_labels(x, tokenizer))
+    dataset = dataset.map(
+        lambda x: tokenize_and_preserve_labels(x, tokenizer), num_proc=num_workers
+    )
     encoded_dataset = dataset.map(
         lambda row: tokenizer(
             " ".join(row["tokens"]), padding="max_length", truncation=True
@@ -73,6 +77,7 @@ def swag_prepare_and_save(
     dataset: Dataset,
     tokenizer: BertTokenizer,
     num_workers: int,
+    seed: np.random.default_rng,
 ) -> None:
     def prepare(row):
         # Based on https://github.com/google-research/bert/issues/38
@@ -86,7 +91,7 @@ def swag_prepare_and_save(
         )
 
     if sample:
-        sample_idx = np.random.choice(dataset.num_rows, sample, replace=False)
+        sample_idx = seed.choice(dataset.num_rows, sample, replace=False)
         dataset = dataset.select(sample_idx)
 
     encoded_dataset = dataset.map(
@@ -141,19 +146,23 @@ if __name__ == "__main__":
         train_dataset = dataset_dict["train"]
         val_dataset = dataset_dict["validation"]
 
+    seed = np.random.default_rng(42)
+
     PREPARE_AND_SAVE[args.dataset_name](
-        args.save_path,
+        os.path.join(args.save_path, args.dataset_name),
         "train",
         args.sample_train,
         train_dataset,
         tokenizer,
         args.num_workers,
+        seed=seed,
     )
     PREPARE_AND_SAVE[args.dataset_name](
-        args.save_path,
+        os.path.join(args.save_path, args.dataset_name),
         "val",
         args.sample_validation,
         val_dataset,
         tokenizer,
         args.num_workers,
+        seed=seed,
     )

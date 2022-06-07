@@ -56,5 +56,5 @@ if __name__ == "__main__":
         num_workers=config["num_workers"],
     )
 
-    model = GET_MODEL[config["task"]](config={"lr": config["lr"], "eps": config["eps"]})
+    model = GET_MODEL[config["task"]](config=config)
     train_model(model, dataloaders, config)

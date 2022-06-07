@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 import pytorch_lightning as pl
 import torch
 from torch.optim import Adam
+from torch.optim.lr_scheduler import StepLR
+from torchmetrics.functional import accuracy, f1_score
 from transformers import (
     BertForMultipleChoice,
     BertForSequenceClassification,
@@ -13,18 +15,22 @@ from transformers import (
 class BaseBert(pl.LightningModule, ABC):
     def __init__(self, config):
         super().__init__()
+        self.weight_decay = config["weight_decay"]
         self.lr = config["lr"]
         self.eps = config["eps"]
-
+        self.gamma = config["gamma"]
+        self.opt_step_size = config["opt_step_size"]
         self.save_hyperparameters()
 
-    @abstractmethod
-    def calculate_accuracy(self, logits, labels):
-        pass
-
     def configure_optimizers(self):
-        optimizer = Adam(self.model.parameters(), lr=self.lr, eps=self.eps)
-        return optimizer
+        optimizer = Adam(
+            self.model.parameters(),
+            lr=self.lr,
+            eps=self.eps,
+            weight_decay=self.weight_decay,
+        )
+        scheduler = StepLR(optimizer, self.opt_step_size, gamma=self.gamma)
+        return [optimizer], [scheduler]
 
     def forward(self, **inputs):
         outputs = self.model(**inputs)
@@ -33,18 +39,39 @@ class BaseBert(pl.LightningModule, ABC):
     def training_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss, logits = outputs[:2]
-        accuracy = self.calculate_accuracy(logits, batch["labels"])
         self.log("train_loss", loss)
-        self.log("train_accuracy", accuracy)
+        self.log("train_accuracy", self.calculate_accuracy(logits, batch["labels"]))
+        self.log("train_f1", self.calculate_f1_score(logits, batch["labels"])),
         return loss
 
     def validation_step(self, batch, batch_idx):
         outputs = self(**batch)
         loss, logits = outputs[:2]
-        accuracy = self.calculate_accuracy(logits, batch["labels"])
         self.log("val_loss", loss, on_step=False, on_epoch=True)
-        self.log("val_accuracy", accuracy, on_step=False, on_epoch=True)
+        self.log(
+            "val_accuracy",
+            self.calculate_accuracy(logits, batch["labels"]),
+            on_step=False,
+            on_epoch=True,
+        )
+        self.log(
+            "val_f1",
+            self.calculate_f1_score(logits, batch["labels"]),
+            on_step=False,
+            on_epoch=True,
+        )
         return loss
+
+    def freeze_first_n(self, n) -> None:
+        for name, param in list(self.model.named_parameters())[:n]:
+            print(f"This layer will be frozen: {name}")
+            param.requires_grad = False
+
+    def calculate_accuracy(self, logits, labels):
+        return accuracy(logits, labels)
+
+    def calculate_f1_score(self, logits, labels):
+        return f1_score(logits, labels)
 
 
 class AmazonPolarityBert(BaseBert):
@@ -54,11 +81,8 @@ class AmazonPolarityBert(BaseBert):
         self.model = BertForSequenceClassification.from_pretrained(
             "bert-base-uncased", num_labels=2
         )
-
-    def calculate_accuracy(self, logits, labels):
-        preds = torch.argmax(logits, dim=1)
-        correct_preds = torch.sum(preds == labels)
-        return correct_preds / len(preds)
+        if config["freeze_first_n"] != -1:
+            self.freeze_first_n(config["freeze_first_n"])
 
 
 class SwagBert(BaseBert):
@@ -68,11 +92,8 @@ class SwagBert(BaseBert):
         self.model = BertForMultipleChoice.from_pretrained(
             "bert-base-uncased", num_labels=4
         )
-
-    def calculate_accuracy(self, logits, labels):
-        preds = torch.argmax(logits, dim=1)
-        correct_preds = torch.sum(preds == labels)
-        return correct_preds / len(preds)
+        if config["freeze_first_n"] != -1:
+            self.freeze_first_n(config["freeze_first_n"])
 
 
 class AcronymIdentificationBert(BaseBert):
@@ -82,8 +103,13 @@ class AcronymIdentificationBert(BaseBert):
         self.model = BertForTokenClassification.from_pretrained(
             "bert-base-uncased", num_labels=5
         )
+        if config["freeze_first_n"] != -1:
+            self.freeze_first_n(config["freeze_first_n"])
 
     def calculate_accuracy(self, logits, labels):
         preds = logits.argmax(-1)
-        accuracy = torch.mean((preds == labels).float())
-        return accuracy
+        return accuracy(preds, labels, mdmc_average="global")
+
+    def calculate_f1_score(self, logits, labels):
+        preds = logits.argmax(-1)
+        return f1_score(preds, labels, mdmc_average="global")
