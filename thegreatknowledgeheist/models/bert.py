@@ -78,8 +78,7 @@ class BaseBert(pl.LightningModule, ABC):
 
 
 class AmazonPolarityBert(BaseBert):
-    def __init__(self, bert_config: BertConfig, config, pretrained: bool = True,
-                 pretrained_name_or_path: Union[str, None] = None):
+    def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
         super().__init__(config)
 
 
@@ -98,8 +97,7 @@ class AmazonPolarityBert(BaseBert):
         self.f1 = F1Score(num_classes=bert_config.num_labels, average="macro")
 
 class SwagBert(BaseBert):
-    def __init__(self, config, bert_config: BertConfig, pretrained: bool = True,
-                 pretrained_name_or_path: Union[str, None] = None):
+    def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
         super().__init__(config)
 
         bert_config.num_labels = 4
