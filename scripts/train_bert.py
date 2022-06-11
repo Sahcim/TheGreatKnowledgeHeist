@@ -7,17 +7,7 @@ from pytorch_lightning.loggers import WandbLogger
 
 from thegreatknowledgeheist.data import get_dataloaders
 from thegreatknowledgeheist.io import load_yaml
-from thegreatknowledgeheist.models.bert import (
-    AcronymIdentificationBert,
-    AmazonPolarityBert,
-    SwagBert,
-)
-
-GET_MODEL = {
-    "amazon_polarity": AmazonPolarityBert,
-    "acronym_identification": AcronymIdentificationBert,
-    "swag": SwagBert,
-}
+from thegreatknowledgeheist.models import BertFactory
 
 
 def train_model(model, dataloaders, config):
@@ -56,5 +46,7 @@ if __name__ == "__main__":
         num_workers=config["num_workers"],
     )
 
-    model = GET_MODEL[config["task"]](config=config)
+    factory = BertFactory()
+
+    model = factory.create_model(config["task"], config=config)
     train_model(model, dataloaders, config)
