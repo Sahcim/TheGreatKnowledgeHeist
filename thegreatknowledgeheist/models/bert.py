@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from typing import Literal, Union
+from abc import ABC
 
 import pytorch_lightning as pl
 import torch
@@ -81,7 +80,6 @@ class AmazonPolarityBert(BaseBert):
     def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
         super().__init__(config)
 
-
         bert_config.num_labels = 2
 
         if pretrained:
@@ -95,6 +93,7 @@ class AmazonPolarityBert(BaseBert):
             self.freeze_first_n(config["freeze_first_n"])
 
         self.f1 = F1Score(num_classes=bert_config.num_labels, average="macro")
+
 
 class SwagBert(BaseBert):
     def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
@@ -113,7 +112,6 @@ class SwagBert(BaseBert):
             self.freeze_first_n(config["freeze_first_n"])
 
         self.f1 = F1Score(num_classes=bert_config.num_labels, average="macro")
-
 
 
 class AcronymIdentificationBert(BaseBert):
@@ -143,27 +141,3 @@ class AcronymIdentificationBert(BaseBert):
         preds = torch.flatten(logits.argmax(-1))
         labels = torch.flatten(labels)
         return self.f1(preds, labels)
-
-
-TASK = Literal['amazon_polarity', 'acronym_identification', 'swag']
-
-
-class BertFactory:
-    def __init__(self):
-        self._model_builders = {
-            'amazon_polarity': AmazonPolarityBert,
-            'acronym_identification': AcronymIdentificationBert,
-            'swag': SwagBert,
-        }
-
-    def create_model(self, task_name: TASK, config, bert_config: BertConfig = None, pretrained: bool = True,
-                     pretrained_name_or_path: Union[str, None] = None):
-        if pretrained_name_or_path is None:
-            pretrained_name_or_path = "bert-base-uncased"
-
-        if bert_config is None:
-            bert_config = BertConfig.from_pretrained(pretrained_name_or_path)
-
-        model_builder = self._model_builders[task_name]
-
-        return model_builder(config, bert_config, pretrained, pretrained_name_or_path)

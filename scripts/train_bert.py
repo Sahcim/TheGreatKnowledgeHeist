@@ -7,7 +7,7 @@ from pytorch_lightning.loggers import WandbLogger
 
 from thegreatknowledgeheist.data import get_dataloaders
 from thegreatknowledgeheist.io import load_yaml
-from thegreatknowledgeheist.models.bert import BertFactory
+from thegreatknowledgeheist.models import BertFactory
 
 
 def train_model(model, dataloaders, config):
