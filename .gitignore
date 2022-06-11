@@ -10,3 +10,4 @@ thegreatknowledgeheist/model_checkpoints/
 thegreatknowledgeheist/data/
 data/
 out/
+configs/*.yaml
