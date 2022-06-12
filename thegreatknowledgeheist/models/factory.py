@@ -15,14 +15,19 @@ class BertFactory:
             'swag': SwagBert,
         }
 
-    def create_model(self, task_name: TASK, config, bert_config: Optional[BertConfig] = None, pretrained: bool = True,
-                     pretrained_name_or_path: Optional[str] = None):
-        if pretrained_name_or_path is None:
-            pretrained_name_or_path = "bert-base-uncased"
+    def create_model(
+            self, task_name: TASK, config, bert_config: Optional[BertConfig] = None, pretrained: bool = True,
+            checkpoint_path: Optional[str] = None
+    ):
 
         if bert_config is None:
-            bert_config = BertConfig.from_pretrained(pretrained_name_or_path)
+            bert_config = BertConfig()
 
         model_builder = self._model_builders[task_name]
 
-        return model_builder(config, bert_config, pretrained, pretrained_name_or_path)
+        if checkpoint_path is not None:
+            return model_builder.load_from_checkpoint(
+                checkpoint_path, config=config, bert_config=bert_config, pretrained=False
+            )
+
+        return model_builder(config, bert_config, pretrained)

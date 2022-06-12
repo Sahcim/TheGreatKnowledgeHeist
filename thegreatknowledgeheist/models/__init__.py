@@ -1,1 +1,1 @@
-from factory import BertFactory
+from .factory import BertFactory
