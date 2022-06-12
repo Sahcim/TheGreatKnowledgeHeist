@@ -77,14 +77,14 @@ class BaseBert(pl.LightningModule, ABC):
 
 
 class AmazonPolarityBert(BaseBert):
-    def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
+    def __init__(self, config, bert_config: BertConfig, pretrained: bool):
         super().__init__(config)
 
         bert_config.num_labels = 2
 
         if pretrained:
             self.model = BertForSequenceClassification.from_pretrained(
-                pretrained_name_or_path, config=bert_config
+                "bert-base-uncased", config=bert_config
             )
         else:
             self.model = BertForSequenceClassification(bert_config)
@@ -96,14 +96,14 @@ class AmazonPolarityBert(BaseBert):
 
 
 class SwagBert(BaseBert):
-    def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
+    def __init__(self, config, bert_config: BertConfig, pretrained: bool):
         super().__init__(config)
 
         bert_config.num_labels = 4
 
         if pretrained:
             self.model = BertForMultipleChoice.from_pretrained(
-                pretrained_name_or_path, config=bert_config
+                "bert-base-uncased", config=bert_config
             )
         else:
             self.model = BertForMultipleChoice(bert_config)
@@ -115,14 +115,14 @@ class SwagBert(BaseBert):
 
 
 class AcronymIdentificationBert(BaseBert):
-    def __init__(self, config, bert_config: BertConfig, pretrained: bool, pretrained_name_or_path: str):
+    def __init__(self, config, bert_config: BertConfig, pretrained: bool):
         super().__init__(config)
 
         bert_config.num_labels = 5
 
         if pretrained:
             self.model = BertForTokenClassification.from_pretrained(
-                pretrained_name_or_path, config=bert_config
+                "bert-base-uncased", config=bert_config
             )
         else:
             self.model = BertForTokenClassification(bert_config)
