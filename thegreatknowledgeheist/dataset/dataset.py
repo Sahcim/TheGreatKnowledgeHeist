@@ -3,7 +3,6 @@ from typing import Dict
 
 import torch
 from datasets import Dataset, load_from_disk
-from torch.utils.data.dataloader import DataLoader
 
 
 def get_amazon_polarity(path_to_dataset: str) -> Dict[str, Dataset]:
@@ -55,20 +54,3 @@ GET_DATASET = {
     "acronym_identification": get_acronym_identification,
     "swag": get_swag,
 }
-
-
-def get_dataloaders(
-    dataset_name: str, path_to_dataset: str, batch_size: int, num_workers: int
-) -> Dict[str, DataLoader]:
-    torch.multiprocessing.set_sharing_strategy("file_system")
-    datasets = GET_DATASET[dataset_name](path_to_dataset)
-
-    dataloaders = {
-        "train": DataLoader(
-            datasets["train"], batch_size=batch_size, num_workers=num_workers
-        ),
-        "val": DataLoader(
-            datasets["val"], batch_size=batch_size, num_workers=num_workers
-        ),
-    }
-    return dataloaders

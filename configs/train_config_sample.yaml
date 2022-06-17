@@ -1,13 +1,19 @@
-outputs_path: out
-dataset_path: data
-task: acronym_identification
+experiment_name: BIG-SWAG
+save_checkpoint: True
+output_path: out
+model_name: "bert_solo"
+model_config:
+  pretrained: True
+  n_layers_to_freeze: 160
+task_name: "swag"
+data_config:
+    path_to_dataset: data/swag
+    batch_size: 16
+    num_workers: 8
 gpus: 1
-num_workers: 8
-batch_size: 32
-lr: 0.0001
-eps: 1.0e-8
-max_epochs: 10
-freeze_first_n: 165
-opt_step_size: 4
-gamma: 0.1
-weight_decay: 1.0e-4
+adamw_start_lr: 1.0e-4
+adamw_eps: 1.0e-8
+adamw_weight_decay: 1.0e-6
+scheduler_step_size: 5
+scheduler_step_gamma: 0.1
+number_of_epochs: 10

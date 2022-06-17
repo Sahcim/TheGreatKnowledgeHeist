@@ -7,3 +7,4 @@ pytorch-lightning==1.6.3
 setuptools==57.0.0
 PyYAML==6.0
 transformers==4.19.2
+dacite==1.6.0
