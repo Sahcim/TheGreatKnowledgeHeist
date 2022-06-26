@@ -1,0 +1,29 @@
+experiment_name: AMAZON-4-layers-layers-kd
+project_name: Final
+output_path: out
+model_name: "bert_kd"
+save_checkpoint: False
+task_name: "amazon_polarity"
+data_config:
+    path_to_dataset: data/amazon_polarity
+    batch_size: 16
+    num_workers: 8
+teacher_model_config:
+  pretrained: False
+  checkpoint_path: out/model_checkpoints/AMAZON-BIG-amazon_polarityepoch=02-val_loss=0.20053.ckpt
+  bert_config:
+    output_hidden_states: True
+student_model_config:
+  pretrained: False
+  bert_config:
+    num_hidden_layers: 4
+    output_hidden_states: True
+logits_kd_function: default_logits()
+layers_kd_function: mse_layers(4, 12)
+gpus: 1
+adamw_start_lr: 1.0e-4
+adamw_eps: 1.0e-8
+adamw_weight_decay: 1.0e-5
+scheduler_step_size: 5
+scheduler_step_gamma: 0.1
+number_of_epochs: 10

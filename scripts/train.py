@@ -28,7 +28,7 @@ def train_model(model: BaseModel, dataloaders: DataLoader, config: BaseModelConf
         logger=WandbLogger(
             name=config.experiment_name,
             save_dir=f"{config.output_path}/logs",
-            project="TheGreatKnowledgeTransferAcronym",
+            project=config.project_name,
             entity="mma",
         ),
         gpus=config.gpus,

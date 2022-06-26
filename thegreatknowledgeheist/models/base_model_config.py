@@ -9,6 +9,7 @@ class BaseModelConfig:
 
     # Experiment
     experiment_name: str
+    project_name: str
     save_checkpoint: bool
     output_path: str
     # Model

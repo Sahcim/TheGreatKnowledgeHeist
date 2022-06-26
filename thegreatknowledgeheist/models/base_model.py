@@ -18,7 +18,7 @@ class BaseModel(pl.LightningModule, ABC):
 
     def configure_optimizers(self):
         optimizer = AdamW(
-            self.model.parameters(),
+            self.parameters(),
             lr=self.config.adamw_start_lr,
             eps=self.config.adamw_eps,
             weight_decay=self.config.adamw_weight_decay,
