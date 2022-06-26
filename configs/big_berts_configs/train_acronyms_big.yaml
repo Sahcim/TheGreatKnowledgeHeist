@@ -1,12 +1,11 @@
-experiment_name: SWAG-BIG
+experiment_name: ACRONYM-BIG
 project_name: Final
-save_checkpoint: True
 output_path: out
 model_name: "bert_solo"
 save_checkpoint: True
-task_name: "swag"
+task_name: "acronym_identification"
 data_config:
-    path_to_dataset: data/swag
+    path_to_dataset: data/acronym_identification
     batch_size: 16
     num_workers: 8
 model_config:
@@ -19,3 +18,4 @@ adamw_weight_decay: 1.0e-5
 scheduler_step_size: 5
 scheduler_step_gamma: 0.1
 number_of_epochs: 10
+

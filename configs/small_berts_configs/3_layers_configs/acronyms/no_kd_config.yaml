@@ -1,17 +1,17 @@
-experiment_name: SWAG-BIG
+experiment_name: ACRONYM-3-layers-no-kd
 project_name: Final
-save_checkpoint: True
 output_path: out
 model_name: "bert_solo"
-save_checkpoint: True
-task_name: "swag"
+save_checkpoint: False
+task_name: "acronym_identification"
 data_config:
-    path_to_dataset: data/swag
+    path_to_dataset: data/acronym_identification
     batch_size: 16
     num_workers: 8
 model_config:
-  pretrained: True
-  n_layers_to_freeze: 165
+  pretrained: False
+  bert_config:
+    num_hidden_layers: 3
 gpus: 1
 adamw_start_lr: 1.0e-4
 adamw_eps: 1.0e-8
